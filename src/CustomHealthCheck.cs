@@ -13,7 +13,7 @@ namespace HealthChecks.WebApp
         public async Task<HealthCheckResult> CheckHealthAsync(
             HealthCheckContext context, CancellationToken cancellationToken = default)
         {
-            return HealthCheckResult.Degraded();
+            return HealthCheckResult.Healthy();
         }
     }
 }
