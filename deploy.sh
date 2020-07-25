@@ -23,11 +23,11 @@ sh publish.sh
 az webapp config appsettings set \
     --resource-group $rgName \
     --name healthportal1234 \
-    --slot preview \
+    --slot staging \
     --settings WEBSITE_RUN_FROM_PACKAGE=1
 
 az webapp deployment source config-zip \
     --name healthportal1234 \
     --resource-group $rgName \
     --src package.zip \
-    --slot preview
+    --slot staging
