@@ -1,0 +1,52 @@
+
+az group create --name slot-deploy-dev --location australiasoutheast
+
+az configure --defaults group=slot-deploy-dev
+az configure --defaults location=australiasoutheast
+
+doesExist=$(az appservice plan list --query "[?name=='dev-asp-01'].[name]" -o tsv)
+if [ "$doesExist" ]; then
+    echo 'app service plan already exists...'
+else
+    az appservice plan create \
+        --name dev-asp-01 \
+        --sku S1
+fi
+
+doesExist=$(az webapp list --query "[?name=='webapp-healthcheck-dev'].[name]" -o tsv)
+if [ $doesExist ]; then
+    echo 'webapp already exists...'
+else
+    az webapp create \
+        --name webapp-healthcheck-dev \
+        --plan dev-asp-01
+fi
+
+az webapp deployment slot create \
+    --name webapp-healthcheck-dev \
+    --slot staging
+
+az webapp config appsettings set \
+    --name webapp-healthcheck-dev \
+    --settings "Version=1.0.20" \
+    --slot staging
+
+sh publish.sh
+az webapp deployment source config-zip \
+    --name webapp-healthcheck-dev \
+    --slot staging \
+    --src package.zip
+
+echo 'starting staging slot...'
+az webapp start --name webapp-healthcheck-dev --slot staging
+echo 'staging slot started!'
+
+echo 'swapping...'
+az webapp deployment slot swap \
+    --name webapp-healthcheck-dev \
+    --slot staging
+echo 'swapped!!!'
+
+echo 'stopping staging slot...'
+az webapp stop --name webapp-healthcheck-dev --slot staging
+echo 'staging slot stopped!'
