@@ -31,6 +31,7 @@ $doesExist = $(az webapp list --query "[?name=='$appName'].name" -o tsv)
 if ( $doesExist ) {
     Write-Host "$appName already exists..."
 } else {
+    # https://octopus.com/blog/powershell-pipe-escaping
     Write-Host "Creating a blank function app..."
     az webapp create `
         --name $appName `
@@ -39,7 +40,6 @@ if ( $doesExist ) {
 }
 
 Write-Host "Create a system-assigned identity..."
-# https://octopus.com/blog/powershell-pipe-escaping
 $principalId = $(az webapp identity assign `
     --name $appName `
     --query principalId `
